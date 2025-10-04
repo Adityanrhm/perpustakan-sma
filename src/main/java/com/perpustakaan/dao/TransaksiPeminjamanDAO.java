@@ -259,80 +259,86 @@ public TransaksiPeminjaman saveWithDetails(TransaksiPeminjaman transaksi) throws
 }
 
 
-    
-    // MODIFIED: Insert - new schema
-// Overload Insert - pakai connection dari luar
-private TransaksiPeminjaman insert(Connection conn, TransaksiPeminjaman transaksi) throws SQLException {
-    String sql = """
-        INSERT INTO transaksi_peminjaman 
-        (kode_transaksi, id_siswa, id_pustakawan, tanggal_pinjam, 
-         total_buku, total_denda, status_keseluruhan, catatan) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """;
+    private TransaksiPeminjaman insert(Connection conn, TransaksiPeminjaman transaksi) throws SQLException {
+        String sql = """
+            INSERT INTO transaksi_peminjaman 
+            (kode_transaksi, id_siswa, id_pustakawan, tanggal_pinjam, 
+             total_buku, total_denda, status_keseluruhan, catatan) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
 
-    try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-        stmt.setString(1, transaksi.getKodeTransaksi());
-        stmt.setInt(2, transaksi.getSiswa().getIdSiswa());
-        stmt.setInt(3, transaksi.getPustakawan().getIdPustakawan());
-        stmt.setDate(4, Date.valueOf(transaksi.getTanggalPinjam()));
-        stmt.setInt(5, transaksi.getTotalBuku());
-        stmt.setBigDecimal(6, transaksi.getTotalDenda() != null ? transaksi.getTotalDenda() : BigDecimal.ZERO);
-        stmt.setString(7, transaksi.getStatusKeseluruhan() != null ? transaksi.getStatusKeseluruhan() : "AKTIF");
-        stmt.setString(8, transaksi.getCatatan());
+        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, transaksi.getKodeTransaksi());
+            stmt.setInt(2, transaksi.getSiswa().getIdSiswa());
+            stmt.setInt(3, transaksi.getPustakawan().getIdPustakawan());
+            stmt.setDate(4, Date.valueOf(transaksi.getTanggalPinjam()));
+            stmt.setInt(5, transaksi.getTotalBuku());
+            stmt.setBigDecimal(6, transaksi.getTotalDenda() != null ? transaksi.getTotalDenda() : BigDecimal.ZERO);
+            stmt.setString(7, transaksi.getStatusKeseluruhan() != null ? transaksi.getStatusKeseluruhan() : "AKTIF");
+            stmt.setString(8, transaksi.getCatatan());
 
-        int affectedRows = stmt.executeUpdate();
-        if (affectedRows > 0) {
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    transaksi.setIdTransaksi(generatedKeys.getInt(1));
-                    return transaksi;
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        transaksi.setIdTransaksi(generatedKeys.getInt(1));
+                        return transaksi;
+                    }
                 }
             }
         }
+        throw new SQLException("Creating transaksi failed, no ID obtained.");
     }
-    throw new SQLException("Creating transaksi failed, no ID obtained.");
-}
 
-// Overload Update - pakai connection dari luar
-private TransaksiPeminjaman update(Connection conn, TransaksiPeminjaman transaksi) throws SQLException {
-    String sql = """
-        UPDATE transaksi_peminjaman SET 
-        total_buku = ?, total_denda = ?, status_keseluruhan = ?, catatan = ?
-        WHERE id_transaksi = ?
-        """;
+    // Overload Update - pakai connection dari luar
+    private TransaksiPeminjaman update(Connection conn, TransaksiPeminjaman transaksi) throws SQLException {
+        String sql = """
+            UPDATE transaksi_peminjaman SET 
+            total_buku = ?, total_denda = ?, status_keseluruhan = ?, catatan = ?
+            WHERE id_transaksi = ?
+            """;
 
-    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-        stmt.setInt(1, transaksi.getTotalBuku());
-        stmt.setBigDecimal(2, transaksi.getTotalDenda() != null ? transaksi.getTotalDenda() : BigDecimal.ZERO);
-        stmt.setString(3, transaksi.getStatusKeseluruhan() != null ? transaksi.getStatusKeseluruhan() : "AKTIF");
-        stmt.setString(4, transaksi.getCatatan());
-        stmt.setInt(5, transaksi.getIdTransaksi());
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, transaksi.getTotalBuku());
+            stmt.setBigDecimal(2, transaksi.getTotalDenda() != null ? transaksi.getTotalDenda() : BigDecimal.ZERO);
+            stmt.setString(3, transaksi.getStatusKeseluruhan() != null ? transaksi.getStatusKeseluruhan() : "AKTIF");
+            stmt.setString(4, transaksi.getCatatan());
+            stmt.setInt(5, transaksi.getIdTransaksi());
 
-        stmt.executeUpdate();
-        return transaksi;
+            stmt.executeUpdate();
+            return transaksi;
+        }
     }
-}
 
     
     public String generateKodeTransaksi() throws SQLException {
-        String sql = """
-            SELECT CONCAT('TXN', YEAR(NOW()), LPAD(MONTH(NOW()), 2, '0'), 
-            LPAD(COALESCE(MAX(SUBSTRING(kode_transaksi, 8)) + 1, 1), 4, '0')) 
-            FROM transaksi_peminjaman WHERE kode_transaksi LIKE CONCAT('TXN', YEAR(NOW()), LPAD(MONTH(NOW()), 2, '0'), '%')
-            """;
-        
+        // Get current year and month
+        int year = java.time.LocalDate.now().getYear();
+        int month = java.time.LocalDate.now().getMonthValue();
+        String prefix = String.format("TXN%d%02d", year, month);
+
+        // Find max sequence number for this month
+        String sql = "SELECT MAX(CAST(SUBSTRING(kode_transaksi, ?) AS UNSIGNED)) " +
+                     "FROM transaksi_peminjaman " +
+                     "WHERE kode_transaksi LIKE ?";
+
         try (Connection conn = dbConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            if (rs.next()) {
-                return rs.getString(1);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, prefix.length() + 1); // Dynamic position based on prefix length
+            stmt.setString(2, prefix + "%");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int maxSeq = rs.getInt(1);
+                    int nextSeq = maxSeq + 1;
+                    return prefix + String.format("%04d", nextSeq);
+                }
             }
         }
-        
-        // Fallback
-        return "TXN" + java.time.LocalDate.now().getYear() + 
-               String.format("%02d", java.time.LocalDate.now().getMonthValue()) + "0001";
+
+        // Fallback: first transaction of the month
+        return prefix + "0001";
     }
     
     // MODIFIED: Count active loans - now counts individual items

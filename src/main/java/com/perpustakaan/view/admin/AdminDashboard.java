@@ -1,207 +1,260 @@
 package com.perpustakaan.view.admin;
 
 import com.perpustakaan.util.UserSession;
+import com.perpustakaan.util.UIHelper;
 import com.perpustakaan.view.LoginFrame;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
- * Dashboard untuk Admin
+ * Admin Dashboard - Simple & Clean (No Sidebar)
  */
 public class AdminDashboard extends JFrame {
-    private JMenuBar menuBar;
-    private JMenu menuMaster, menuLaporan, menuSistem;
-    private JMenuItem miPustakawan, miSiswa;
-    private JMenuItem miLaporanBuku, miLaporanTransaksi, miLaporanSiswa;
-    private JMenuItem miPengaturan, miLogout, miExit;
+    private static final Color PRIMARY_BROWN = new Color(92, 64, 51);
+    private static final Color SECONDARY_BROWN = new Color(139, 90, 60);
+    private static final Color ACCENT_CREAM = new Color(245, 238, 220);
+    private static final Color TEXT_DARK = new Color(62, 44, 36);
+    private static final Color BACKGROUND_LIGHT = new Color(250, 248, 243);
     
-    private JPanel panelMain;
-    private JLabel lblWelcome;
-    private JLabel lblUserInfo;
-    private JLabel lblDateTime;
+    private JLabel lblWelcome, lblUserInfo, lblDateTime;
     
     public AdminDashboard() {
         initComponents();
-        setupMenuBar();
         setupLayout();
-        setupEventListeners();
         updateUserInfo();
         
-        setTitle("Admin Dashboard - Perpustakaan SMA");
+        setTitle("Admin Dashboard - Perpustakaan SMA Haein");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setMinimumSize(new Dimension(1024, 768));
-        
-        // Center the frame
+        setMinimumSize(new Dimension(1200, 700));
         setLocationRelativeTo(null);
-    }
-    
-    private void initComponents() {
-        panelMain = new JPanel(new BorderLayout());
         
-        lblWelcome = new JLabel("Selamat Datang, Administrator!", SwingConstants.CENTER);
-        lblWelcome.setFont(new Font("Arial", Font.BOLD, 24));
-        lblWelcome.setBorder(BorderFactory.createEmptyBorder(50, 0, 30, 0));
-        
-        lblUserInfo = new JLabel("", SwingConstants.CENTER);
-        lblUserInfo.setFont(new Font("Arial", Font.PLAIN, 16));
-        
-        lblDateTime = new JLabel("", SwingConstants.CENTER);
-        lblDateTime.setFont(new Font("Arial", Font.PLAIN, 14));
-        lblDateTime.setForeground(Color.GRAY);
-        
-        // Update date time every second
-        Timer timer = new Timer(1000, e -> updateDateTime());
-        timer.start();
-        updateDateTime();
-    }
-    
-    private void setupMenuBar() {
-        menuBar = new JMenuBar();
-        
-        // Menu Master Data
-        menuMaster = new JMenu("Master Data");
-        miPustakawan = new JMenuItem("Kelola Pustakawan");
-        miSiswa = new JMenuItem("Kelola Siswa");
-        
-        menuMaster.add(miPustakawan);
-        menuMaster.add(miSiswa);
-        
-        // Menu Laporan
-        menuLaporan = new JMenu("Laporan");
-        miLaporanBuku = new JMenuItem("Laporan Data Buku");
-        miLaporanTransaksi = new JMenuItem("Laporan Transaksi Peminjaman");
-        miLaporanSiswa = new JMenuItem("Laporan Data Siswa");
-        
-        menuLaporan.add(miLaporanBuku);
-        menuLaporan.add(miLaporanTransaksi);
-        menuLaporan.add(miLaporanSiswa);
-        
-        // Menu Sistem
-        menuSistem = new JMenu("Sistem");
-        miPengaturan = new JMenuItem("Pengaturan Sistem");
-        miLogout = new JMenuItem("Logout");
-        miExit = new JMenuItem("Keluar Aplikasi");
-        
-        menuSistem.add(miPengaturan);
-        menuSistem.addSeparator();
-        menuSistem.add(miLogout);
-        menuSistem.add(miExit);
-        
-        menuBar.add(menuMaster);
-        menuBar.add(menuLaporan);
-        menuBar.add(menuSistem);
-        
-        setJMenuBar(menuBar);
-    }
-    
-    private void setupLayout() {
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(lblWelcome, BorderLayout.NORTH);
-        
-        JPanel infoPanel = new JPanel(new GridLayout(2, 1, 0, 10));
-        infoPanel.add(lblUserInfo);
-        infoPanel.add(lblDateTime);
-        centerPanel.add(infoPanel, BorderLayout.CENTER);
-        
-        panelMain.add(centerPanel, BorderLayout.CENTER);
-        
-        // Status bar
-        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JLabel lblStatus = new JLabel("Status: Online | Role: Administrator");
-        lblStatus.setFont(new Font("Arial", Font.PLAIN, 12));
-        statusBar.add(lblStatus);
-        panelMain.add(statusBar, BorderLayout.SOUTH);
-        
-        add(panelMain);
-    }
-    
-    private void setupEventListeners() {
-        // Master Data menu items
-        miPustakawan.addActionListener(e -> {
-            try {
-                new PustakawanManagementFrame(this).setVisible(true);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error opening Pustakawan Management: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        
-        miSiswa.addActionListener(e -> {
-            try {
-                new SiswaManagementFrame(this).setVisible(true);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error opening Siswa Management: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        
-        // Laporan menu items - Gabungkan semua laporan dalam satu frame
-        ActionListener openReportsListener = e -> {
-            try {
-                new ReportFrame().setVisible(true);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error opening Reports: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        };
-        
-        miLaporanBuku.addActionListener(openReportsListener);
-        miLaporanTransaksi.addActionListener(openReportsListener);
-        miLaporanSiswa.addActionListener(openReportsListener);
-        
-        // Sistem menu items
-        miPengaturan.addActionListener(e -> {
-            // TODO: Open Pengaturan Sistem
-            JOptionPane.showMessageDialog(this, "Fitur Pengaturan Sistem akan segera tersedia", 
-                                        "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        miLogout.addActionListener(e -> logout());
-        
-        miExit.addActionListener(e -> exitApplication());
-        
-        // Window closing event
         addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosing(java.awt.event.WindowEvent e) {
                 exitApplication();
             }
         });
     }
     
+    private void initComponents() {
+        lblWelcome = new JLabel("Selamat Datang, Administrator!");
+        lblWelcome.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblWelcome.setForeground(TEXT_DARK);
+        
+        lblUserInfo = new JLabel("");
+        lblUserInfo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblUserInfo.setForeground(SECONDARY_BROWN);
+        
+        lblDateTime = new JLabel("");
+        lblDateTime.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblDateTime.setForeground(new Color(127, 140, 141));
+        
+        Timer timer = new Timer(1000, e -> updateDateTime());
+        timer.start();
+        updateDateTime();
+    }
+    
+    private void setupLayout() {
+        setLayout(new BorderLayout());
+        getContentPane().setBackground(BACKGROUND_LIGHT);
+        
+        // Top bar
+        JPanel topBar = new JPanel(new BorderLayout());
+        topBar.setBackground(Color.WHITE);
+        topBar.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(20, 30, 20, 30)
+        ));
+        
+        topBar.add(lblWelcome, BorderLayout.WEST);
+        
+        JPanel topRight = new JPanel();
+        topRight.setLayout(new BoxLayout(topRight, BoxLayout.Y_AXIS));
+        topRight.setBackground(Color.WHITE);
+        lblUserInfo.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        lblDateTime.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        topRight.add(lblUserInfo);
+        topRight.add(Box.createRigidArea(new Dimension(0, 3)));
+        topRight.add(lblDateTime);
+        
+        topBar.add(topRight, BorderLayout.EAST);
+        
+        // Main content
+        JPanel mainContent = new JPanel(new BorderLayout());
+        mainContent.setBackground(BACKGROUND_LIGHT);
+        mainContent.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        
+        // Stats cards
+        JPanel statsPanel = createStatsPanel();
+        mainContent.add(statsPanel, BorderLayout.NORTH);
+        
+        // Quick access
+        JPanel quickAccessPanel = createQuickAccessPanel();
+        mainContent.add(quickAccessPanel, BorderLayout.CENTER);
+        
+        add(topBar, BorderLayout.NORTH);
+        add(mainContent, BorderLayout.CENTER);
+    }
+    
+    private JPanel createStatsPanel() {
+        JPanel stats = new JPanel(new GridLayout(1, 4, 20, 0));
+        stats.setBackground(BACKGROUND_LIGHT);
+        stats.setBorder(BorderFactory.createEmptyBorder(0, 0, 30, 0));
+        
+        stats.add(createStatCard("---", "Total Buku", PRIMARY_BROWN));
+        stats.add(createStatCard("---", "Total Siswa", SECONDARY_BROWN));
+        stats.add(createStatCard("---", "Transaksi Aktif", new Color(41, 128, 185)));
+        stats.add(createStatCard("---", "Peminjaman Hari Ini", new Color(46, 204, 113)));
+        
+        return stats;
+    }
+    
+    private JPanel createStatCard(String value, String title, Color accentColor) {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 230, 230), 1),
+            BorderFactory.createEmptyBorder(25, 20, 25, 20)
+        ));
+        
+        JLabel lblValue = new JLabel(value);
+        lblValue.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        lblValue.setForeground(accentColor);
+        lblValue.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblTitle.setForeground(new Color(127, 140, 141));
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        card.add(lblValue);
+        card.add(Box.createRigidArea(new Dimension(0, 8)));
+        card.add(lblTitle);
+        
+        return card;
+    }
+    
+    private JPanel createQuickAccessPanel() {
+        JPanel quickAccess = new JPanel(new BorderLayout());
+        quickAccess.setBackground(BACKGROUND_LIGHT);
+        
+        JLabel lblTitle = new JLabel("Akses Cepat");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitle.setForeground(TEXT_DARK);
+        lblTitle.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        
+        JPanel cardsPanel = new JPanel(new GridLayout(2, 3, 20, 20));
+        cardsPanel.setBackground(BACKGROUND_LIGHT);
+        
+        // Hanya module untuk Admin sesuai kode awal
+        cardsPanel.add(createQuickCard("Kelola Pustakawan", () -> openPustakawanManagement()));
+        cardsPanel.add(createQuickCard("Kelola Siswa", () -> openSiswaManagement()));
+        cardsPanel.add(createQuickCard("Laporan Data Buku", () -> openReportFrame()));
+        cardsPanel.add(createQuickCard("Laporan Transaksi Peminjaman", () -> openReportFrame()));
+        cardsPanel.add(createQuickCard("Laporan Data Siswa", () -> openReportFrame()));
+        
+        // Logout card
+        JPanel logoutCard = createQuickCard("Logout", () -> logout());
+        logoutCard.setBackground(new Color(231, 76, 60));
+        ((JLabel) logoutCard.getComponent(0)).setForeground(Color.WHITE);
+        cardsPanel.add(logoutCard);
+        
+        quickAccess.add(lblTitle, BorderLayout.NORTH);
+        quickAccess.add(cardsPanel, BorderLayout.CENTER);
+        
+        return quickAccess;
+    }
+    
+    private JPanel createQuickCard(String title, Runnable action) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 230, 230), 1),
+            BorderFactory.createEmptyBorder(30, 20, 30, 20)
+        ));
+        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JLabel label = new JLabel(title, SwingConstants.CENTER);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        label.setForeground(TEXT_DARK);
+        
+        card.add(label, BorderLayout.CENTER);
+        
+        card.addMouseListener(new java.awt.event.MouseAdapter() {
+            Color originalBg = card.getBackground();
+            
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                action.run();
+            }
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (originalBg.equals(Color.WHITE)) {
+                    card.setBackground(ACCENT_CREAM);
+                    card.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(PRIMARY_BROWN, 2),
+                        BorderFactory.createEmptyBorder(29, 19, 29, 19)
+                    ));
+                } else {
+                    card.setBackground(new Color(192, 57, 43));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                card.setBackground(originalBg);
+                if (originalBg.equals(Color.WHITE)) {
+                    card.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(230, 230, 230), 1),
+                        BorderFactory.createEmptyBorder(30, 20, 30, 20)
+                    ));
+                }
+            }
+        });
+        
+        return card;
+    }
+    
     private void updateUserInfo() {
         UserSession session = UserSession.getInstance();
         if (session.isLoggedIn()) {
-            String userInfo = String.format("Login sebagai: %s | Durasi: %s",
-                session.getCurrentUser().getLoginIdentifier(),
-                session.getLoginDuration());
-            lblUserInfo.setText(userInfo);
+            lblUserInfo.setText(session.getCurrentUser().getLoginIdentifier() + " | " + session.getLoginDuration());
         }
     }
     
     private void updateDateTime() {
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
         java.time.format.DateTimeFormatter formatter = 
-            java.time.format.DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy HH:mm:ss");
+            java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm:ss");
         lblDateTime.setText(now.format(formatter));
-        
-        // Update user info as well
         updateUserInfo();
     }
     
+    // Actions - Hanya untuk Admin
+    private void openPustakawanManagement() {
+        try {
+            new PustakawanManagementFrame(this).setVisible(true);
+        } catch (Exception e) {
+            UIHelper.showErrorMessage(this, "Error: " + e.getMessage());
+        }
+    }
+    
+    private void openSiswaManagement() {
+        try {
+            new SiswaManagementFrame(this).setVisible(true);
+        } catch (Exception e) {
+            UIHelper.showErrorMessage(this, "Error: " + e.getMessage());
+        }
+    }
+    
+    private void openReportFrame() {
+        try {
+            new ReportFrame().setVisible(true);
+        } catch (Exception e) {
+            UIHelper.showErrorMessage(this, "Error: " + e.getMessage());
+        }
+    }
+    
     private void logout() {
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin logout?",
-            "Konfirmasi Logout",
-            JOptionPane.YES_NO_OPTION);
-        
-        if (confirm == JOptionPane.YES_OPTION) {
+        if (UIHelper.showConfirmDialog(this, "Yakin ingin logout?")) {
             UserSession.getInstance().endSession();
             dispose();
             new LoginFrame().setVisible(true);
@@ -209,12 +262,7 @@ public class AdminDashboard extends JFrame {
     }
     
     private void exitApplication() {
-        int confirm = JOptionPane.showConfirmDialog(this,
-            "Apakah Anda yakin ingin keluar dari aplikasi?",
-            "Konfirmasi Keluar",
-            JOptionPane.YES_NO_OPTION);
-        
-        if (confirm == JOptionPane.YES_OPTION) {
+        if (UIHelper.showConfirmDialog(this, "Yakin ingin keluar?")) {
             UserSession.getInstance().endSession();
             System.exit(0);
         }

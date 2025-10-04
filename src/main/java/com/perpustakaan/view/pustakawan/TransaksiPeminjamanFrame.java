@@ -39,6 +39,7 @@ public class TransaksiPeminjamanFrame extends JDialog {
     private JTextArea txtCatatan;
     private JButton btnCariSiswa, btnTambahItem, btnHapusItem, btnPinjam, btnCancel, btnRefresh;
     private JButton btnTambahTransaksi;
+    private JButton btnLihatDetail, btnEditTransaksi; 
     private JPanel formPanel;
     private JTable tableSelectedItems;
     private DefaultTableModel selectedItemModel;
@@ -139,6 +140,8 @@ public class TransaksiPeminjamanFrame extends JDialog {
         btnPinjam = new JButton("Proses Peminjaman");
         btnCancel = new JButton("Batal");
         btnRefresh = new JButton("Refresh");
+        btnLihatDetail = new JButton("Lihat Detail");
+        btnEditTransaksi = new JButton("Edit Transaksi");
         
         // Button styling
         setupButtonColors();
@@ -148,6 +151,8 @@ public class TransaksiPeminjamanFrame extends JDialog {
         btnHapusItem.setEnabled(false);
         btnPinjam.setEnabled(false);
         btnCancel.setEnabled(false);
+        btnLihatDetail.setEnabled(false);
+        btnEditTransaksi.setEnabled(false);
     }
     
     private void setupButtonColors() {
@@ -163,6 +168,10 @@ public class TransaksiPeminjamanFrame extends JDialog {
         btnCancel.setForeground(Color.WHITE);
         btnRefresh.setBackground(new Color(23, 162, 184));
         btnRefresh.setForeground(Color.WHITE);
+        btnLihatDetail.setBackground(new Color(23, 162, 184));
+        btnLihatDetail.setForeground(Color.WHITE);
+        btnEditTransaksi.setBackground(new Color(255, 193, 7));
+        btnEditTransaksi.setForeground(Color.BLACK);
     }
     
 private void setupLayout() {
@@ -176,6 +185,8 @@ private void setupLayout() {
     JPanel topButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     btnTambahTransaksi = new JButton("Tambah Transaksi Baru"); // <- simpan ke field
     topButtonPanel.add(btnTambahTransaksi);
+    topButtonPanel.add(btnLihatDetail);      // TAMBAHKAN
+    topButtonPanel.add(btnEditTransaksi); 
     topButtonPanel.add(btnRefresh);
     topPanel.add(topButtonPanel, BorderLayout.SOUTH);
 
@@ -185,8 +196,6 @@ private void setupLayout() {
     middlePanel.add(scrollDetailItems, BorderLayout.CENTER);
 
     JPanel middleButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    middleButtonPanel.add(new JButton("Perpanjang Item"));
-    middleButtonPanel.add(new JButton("Lihat Detail"));
     middlePanel.add(middleButtonPanel, BorderLayout.SOUTH);
 
     // Bottom panel - form for new transaction
@@ -279,11 +288,14 @@ private JPanel createFormPanel() {
 
 private void setupEventListeners() {
     // Transaction table selection - show details
-    tableTransaksi.getSelectionModel().addListSelectionListener(e -> {
-        if (!e.getValueIsAdjusting()) {
-            loadSelectedTransactionDetails();
-        }
-    });
+tableTransaksi.getSelectionModel().addListSelectionListener(e -> {
+    if (!e.getValueIsAdjusting()) {
+        int selectedRow = tableTransaksi.getSelectedRow();
+        btnLihatDetail.setEnabled(selectedRow >= 0);
+        btnEditTransaksi.setEnabled(selectedRow >= 0);
+        loadSelectedTransactionDetails();
+    }
+});
 
     // Form buttons
     btnCariSiswa.addActionListener(e -> cariSiswa());
@@ -292,11 +304,63 @@ private void setupEventListeners() {
     btnPinjam.addActionListener(e -> prosesPeminjamanMultiple());
     btnCancel.addActionListener(e -> hideForm());
     btnRefresh.addActionListener(e -> loadData());
+    btnLihatDetail.addActionListener(e -> lihatDetailTransaksi());
+    btnEditTransaksi.addActionListener(e -> editTransaksi());
 
     // Tombol tambah transaksi baru
     btnTambahTransaksi.addActionListener(e -> showForm()); // <- ini yang tadinya error
 }
 
+private void lihatDetailTransaksi() {
+    int selectedRow = tableTransaksi.getSelectedRow();
+    if (selectedRow < 0) {
+        UIHelper.showWarningMessage(this, "Pilih transaksi yang akan dilihat!");
+        return;
+    }
+    
+    try {
+        int idTransaksi = (int) transaksiModel.getValueAt(selectedRow, 0);
+        TransaksiPeminjaman transaksi = transaksiDAO.findByIdWithDetails(idTransaksi);
+        
+        if (transaksi != null) {
+            EnhancedTransaksiDetailDialog dialog = new EnhancedTransaksiDetailDialog(this, transaksi);
+            dialog.setVisible(true);
+        }
+    } catch (SQLException e) {
+        UIHelper.showErrorMessage(this, "Error loading detail: " + e.getMessage());
+    }
+}
+
+private void editTransaksi() {
+    int selectedRow = tableTransaksi.getSelectedRow();
+    if (selectedRow < 0) {
+        UIHelper.showWarningMessage(this, "Pilih transaksi yang akan diedit!");
+        return;
+    }
+    
+    try {
+        int idTransaksi = (int) transaksiModel.getValueAt(selectedRow, 0);
+        TransaksiPeminjaman transaksi = transaksiDAO.findByIdWithDetails(idTransaksi);
+        
+        if (transaksi != null) {
+            // Validasi: hanya transaksi AKTIF yang bisa diedit
+            if (!"AKTIF".equals(transaksi.getStatusKeseluruhan())) {
+                UIHelper.showWarningMessage(this, 
+                    "Hanya transaksi dengan status AKTIF yang bisa diedit!\n" +
+                    "Status saat ini: " + transaksi.getStatusKeseluruhan());
+                return;
+            }
+            
+            EditTransaksiDialog dialog = new EditTransaksiDialog(this, transaksi);
+            dialog.setVisible(true);
+            
+            // Reload setelah edit
+            loadData();
+        }
+    } catch (SQLException e) {
+        UIHelper.showErrorMessage(this, "Error loading transaksi: " + e.getMessage());
+    }
+}
     
     private void loadData() {
         try {

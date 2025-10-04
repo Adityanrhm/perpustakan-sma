@@ -1,3 +1,4 @@
+com\perpustakaan\view\admin\AdminDashboard$2.class
 com\perpustakaan\util\ValidationHelper.class
 com\perpustakaan\view\pustakawan\BookSelectionItem.class
 com\perpustakaan\view\pustakawan\SiswaLookupDialog$1.class
@@ -59,6 +60,7 @@ com\perpustakaan\dao\RoleDAO.class
 com\perpustakaan\view\pustakawan\SiswaManagementPustakawanFrame.class
 com\perpustakaan\view\admin\ReportFrame$4.class
 com\perpustakaan\model\TransaksiPeminjaman.class
+com\perpustakaan\view\pustakawan\EditTransaksiDialog$1.class
 com\perpustakaan\view\SplashScreen$3.class
 com\perpustakaan\model\Buku.class
 com\perpustakaan\view\pustakawan\SiswaManagementPustakawanFrame$2.class
@@ -66,6 +68,7 @@ com\perpustakaan\view\pustakawan\ReturnItem.class
 com\perpustakaan\view\pustakawan\TransaksiLookupDialog$3.class
 com\perpustakaan\view\admin\PustakawanManagementFrame$1.class
 com\perpustakaan\view\pustakawan\BukuManagementFrame$2.class
+com\perpustakaan\view\pustakawan\EditDetailItemDialog.class
 com\perpustakaan\view\SplashScreen.class
 com\perpustakaan\model\PerpanjanganPeminjaman.class
 com\perpustakaan\main\MainApplication.class
@@ -83,6 +86,7 @@ com\perpustakaan\view\LoginFrame$2.class
 com\perpustakaan\view\pustakawan\MultipleBookSelectionDialog$3.class
 com\perpustakaan\view\pustakawan\TransaksiPengembalianFrame$2.class
 com\perpustakaan\dao\SiswaDAO.class
+com\perpustakaan\view\pustakawan\EditTransaksiDialog.class
 com\perpustakaan\view\admin\ReportFrame$2.class
 com\perpustakaan\view\admin\SiswaManagementFrame$1.class
 com\perpustakaan\view\pustakawan\TransaksiLookupDialog$1.class
