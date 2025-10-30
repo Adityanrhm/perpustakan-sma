@@ -13,7 +13,7 @@ import java.awt.event.ActionListener;
 public class AdminDashboard extends JFrame {
     private JMenuBar menuBar;
     private JMenu menuMaster, menuLaporan, menuSistem;
-    private JMenuItem miPustakawan, miSiswa, miKelas, miBuku, miRak, miKategori;
+    private JMenuItem miPustakawan, miSiswa;
     private JMenuItem miLaporanBuku, miLaporanTransaksi, miLaporanSiswa;
     private JMenuItem miPengaturan, miLogout, miExit;
     
@@ -65,18 +65,9 @@ public class AdminDashboard extends JFrame {
         menuMaster = new JMenu("Master Data");
         miPustakawan = new JMenuItem("Kelola Pustakawan");
         miSiswa = new JMenuItem("Kelola Siswa");
-        miKelas = new JMenuItem("Kelola Kelas");
-        miBuku = new JMenuItem("Kelola Buku");
-        miRak = new JMenuItem("Kelola Rak");
-        miKategori = new JMenuItem("Kelola Kategori Buku");
         
         menuMaster.add(miPustakawan);
         menuMaster.add(miSiswa);
-        menuMaster.add(miKelas);
-        menuMaster.addSeparator();
-        menuMaster.add(miBuku);
-        menuMaster.add(miRak);
-        menuMaster.add(miKategori);
         
         // Menu Laporan
         menuLaporan = new JMenu("Laporan");
@@ -147,30 +138,6 @@ public class AdminDashboard extends JFrame {
                     "Error opening Siswa Management: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
-        
-        miKelas.addActionListener(e -> {
-            // TODO: Open Kelas management window
-            JOptionPane.showMessageDialog(this, "Fitur Kelola Kelas akan segera tersedia", 
-                                        "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        miBuku.addActionListener(e -> {
-            // TODO: Open Buku management window
-            JOptionPane.showMessageDialog(this, "Fitur Kelola Buku akan segera tersedia", 
-                                        "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        miRak.addActionListener(e -> {
-            // TODO: Open Rak management window
-            JOptionPane.showMessageDialog(this, "Fitur Kelola Rak akan segera tersedia", 
-                                        "Info", JOptionPane.INFORMATION_MESSAGE);
-        });
-        
-        miKategori.addActionListener(e -> {
-            // TODO: Open Kategori management window
-            JOptionPane.showMessageDialog(this, "Fitur Kelola Kategori Buku akan segera tersedia", 
-                                        "Info", JOptionPane.INFORMATION_MESSAGE);
         });
         
         // Laporan menu items - Gabungkan semua laporan dalam satu frame
